@@ -1,0 +1,379 @@
+<!--
+PDF Merger — Single-file responsive tool
+Features:
+- Merge multiple PDFs client-side
+- Choose compression level (High / Medium / Low) — implemented by rasterizing PDF pages via PDF.js then re-encoding as JPEG at selected quality and building a new PDF using PDF-Lib.
+- Image optimization via HTMLCanvas (controls image quality & resizing)
+- SEO-ready meta tags, structured data, Open Graph, and performance hints
+- Responsive UI and accessible controls
+- Designated ad slots with easy AdSense Ad Unit ID insertion
+
+How to use AdSense: set `ADSENSE_AD_CLIENT` and each ad's `data-ad-slot` (AD_UNIT_ID) at top of the script or insert them into the HTML where noted.
+
+Limitations & Notes:
+- Client-side compression involves rasterizing pages; this reduces fidelity for complex vector content (text may be rasterized). For best fidelity keep compression "Low".
+- Large PDFs may be memory or CPU intensive on low-end devices.
+- This file uses CDN-hosted libraries: PDF.js and PDF-Lib. Ensure network access for them to load.
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PDF Merger & Compressor — Merge, optimize & download PDFs</title>
+  <meta name="description" content="Merge multiple PDFs in the browser, choose compression levels, optimize images, and download a single merged file. Responsive, privacy-friendly and SEO optimized.">
+  <meta name="keywords" content="pdf merger, merge pdf, compress pdf, pdf optimizer, online pdf tool">
+  <link rel="canonical" href="https://example.com/pdf-merger">
+
+  <!-- Open Graph / Social meta -->
+  <meta property="og:title" content="PDF Merger & Compressor — Merge, optimize & download PDFs">
+  <meta property="og:description" content="Merge multiple PDFs in the browser and choose compression levels to reduce file size. Responsive and SEO-optimized tool.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://example.com/pdf-merger">
+  <meta property="og:image" content="https://example.com/assets/pdf-merger-social.png">
+
+  <!-- Structured data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "PDF Merger & Compressor",
+    "url": "https://example.com/pdf-merger",
+    "description": "Merge multiple PDFs in the browser and choose compression levels to reduce file size.",
+    "applicationCategory": "Utilities",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- Performance best-practices -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <style>
+    :root{--bg:#0f1724;--card:#fff;--muted:#6b7280;--accent:#0ea5a4}
+    *{box-sizing:border-box}
+    body{font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:linear-gradient(180deg,#f8fafc 0%, #fff 100%)}
+    header{padding:1rem 1.25rem; display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{display:flex;align-items:center;gap:.75rem}
+    .logo{width:44px;height:44px;border-radius:8px;background:linear-gradient(90deg,#0ea5a4,#0369a1);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    h1{margin:0;font-size:1.125rem}
+    main{max-width:1100px;margin:1rem auto;padding:1rem}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:1rem}
+    @media (max-width:900px){.grid{grid-template-columns:1fr} .sidebar{order:2}}
+    .card{background:var(--card);border-radius:12px;padding:1rem;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
+    .drop{border:2px dashed #e6e9ef;padding:1.25rem;border-radius:10px;text-align:center}
+    .files-list{margin-top:.75rem}
+    .file-item{display:flex;align-items:center;justify-content:space-between;padding:.5rem;border-radius:8px;border:1px solid #eef2f7;margin-bottom:.5rem}
+    label{display:block;font-size:.875rem;margin-bottom:.5rem}
+    select,input[type=file]{width:100%}
+    .controls{display:flex;gap:.5rem;align-items:center}
+    button.primary{background:var(--accent);color:white;border:none;padding:.6rem .9rem;border-radius:10px;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid #d1d5db;padding:.45rem .7rem;border-radius:8px}
+    footer{padding:1rem;text-align:center;color:var(--muted);font-size:.875rem}
+
+    /* ad placeholders */
+    .ad-slot{min-height:90px;border-radius:8px;border:1px dashed #e5e7eb;display:flex;align-items:center;justify-content:center;color:#9ca3af}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">PM</div>
+      <div>
+        <h1>PDF Merger & Compressor</h1>
+        <div style="font-size:12px;color:var(--muted)">Merge, compress & optimize PDFs in your browser</div>
+      </div>
+    </div>
+    <nav aria-label="top navigation" style="display:flex;gap:.5rem;align-items:center">
+      <a href="/" style="text-decoration:none;color:inherit;font-size:.9rem">Home</a>
+      <a href="/tools" style="text-decoration:none;color:inherit;font-size:.9rem">All Tools</a>
+      <a href="/contact" style="text-decoration:none;color:inherit;font-size:.9rem">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <label for="files">Select PDFs to merge</label>
+        <div class="drop" id="dropzone">
+          <div style="font-weight:600">Drag & drop PDF files here</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Or click to choose files (order will be used during merge)</div>
+          <input id="files" type="file" accept="application/pdf" multiple style="opacity:0;position:absolute;left:-9999px">
+          <div style="margin-top:8px">
+            <button id="pickFiles" class="ghost">Choose files</button>
+          </div>
+        </div>
+
+        <div class="files-list" id="filesList" aria-live="polite"></div>
+
+        <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap">
+          <div style="flex:1;min-width:180px">
+            <label for="compression">Compression level</label>
+            <select id="compression" aria-label="Compression level">
+              <option value="low">Low (best quality, least compression)</option>
+              <option value="medium" selected>Medium (balanced)</option>
+              <option value="high">High (strong compression)</option>
+            </select>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px">Compression affects rasterized output quality and file size.</div>
+          </div>
+
+          <div style="min-width:160px">
+            <label for="maxWidth">Max page width (px)</label>
+            <input id="maxWidth" type="number" value="1200" min="400" step="50">
+            <div style="font-size:12px;color:var(--muted);margin-top:6px">Resizes pages before encoding - reduces file size.</div>
+          </div>
+
+          <div style="align-self:flex-end">
+            <div class="controls">
+              <button id="mergeBtn" class="primary">Merge & Download</button>
+              <button id="clearBtn" class="ghost">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem;font-size:13px;color:var(--muted)">
+          Tip: Drag to reorder list items before merging. For complex vector PDFs, use Low compression to preserve clarity.
+        </div>
+      </section>
+
+      <aside class="sidebar card">
+        <h3 style="margin-top:0">Preview & Ads</h3>
+
+        <!-- Ad placeholder (top) - replace data-ad-slot with your Ad Unit ID -->
+        <div class="ad-slot" id="ad-top">Advertisement (Top) — replace with AdSense unit</div>
+
+        <div style="margin-top:1rem">
+          <label>Output preview (first PDF's first page)</label>
+          <canvas id="previewCanvas" style="width:100%;border-radius:8px;border:1px solid #eef2f7"></canvas>
+        </div>
+
+        <div style="margin-top:1rem">
+          <label for="filename">Output file name</label>
+          <input id="filename" type="text" value="merged.pdf">
+        </div>
+
+        <!-- Ad placeholder (bottom) -->
+        <div style="margin-top:1rem" class="ad-slot" id="ad-bottom">Advertisement (Bottom) — replace with AdSense unit</div>
+
+        <div style="margin-top:1rem;color:var(--muted);font-size:.85rem">
+          Privacy: Files are processed locally in your browser — no files are uploaded to servers by default.
+        </div>
+      </aside>
+    </div>
+
+    <section style="margin-top:1rem" class="card">
+      <h3 style="margin:0 0 .5rem 0">How it works</h3>
+      <ol style="margin:0;padding-left:1.1rem;color:var(--muted)">
+        <li>Choose multiple PDFs in the order you want to merge them.</li>
+        <li>Pick a compression level and maximum page width.</li>
+        <li>Click <strong>Merge & Download</strong>. The tool rasterizes each page and re-encodes it at the selected quality to reduce size, then composes a single PDF for download.</li>
+      </ol>
+    </section>
+
+  </main>
+
+  <footer>
+    © <span id="year"></span> PDF Merger — Built for speed & privacy. 
+  </footer>
+
+  <!-- Scripts: PDF.js and PDF-Lib (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.min.js" integrity="" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+  <!--
+  AdSense integration: Replace ADSENSE_AD_CLIENT with your client id (e.g. 'ca-pub-1234567890')
+  and each ad slot's data-ad-slot with your Ad Unit ID. The example below includes placeholders and small helper to inject ad code.
+  -->
+  <script>
+  // ---------- AdSense configuration (EDIT THESE) ----------
+  const ADSENSE_AD_CLIENT = 'ca-pub-REPLACE_WITH_YOUR_CLIENT_ID'; // put your AdSense publisher id here
+  const AD_TOP_UNIT = 'REPLACE_AD_UNIT_ID_TOP'; // ad unit for top slot
+  const AD_BOTTOM_UNIT = 'REPLACE_AD_UNIT_ID_BOTTOM';
+  // --------------------------------------------------------
+
+  // Function to inject AdSense script and ad slots if configured
+  function injectAds(){
+    if(!ADSENSE_AD_CLIENT || ADSENSE_AD_CLIENT.includes('REPLACE')) return; // skip if not set
+    // add global ad client
+    const s = document.createElement('script');
+    s.setAttribute('async','');
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ADSENSE_AD_CLIENT;
+    s.crossOrigin = 'anonymous';
+    document.head.appendChild(s);
+
+    // helper to create ad ins
+    function makeAd(slotId, unit){
+      if(!unit || unit.includes('REPLACE')) return;
+      const container = document.getElementById(slotId);
+      if(!container) return;
+      container.innerHTML = `<ins class="adsbygoogle" style="display:block" data-ad-client="${ADSENSE_AD_CLIENT}" data-ad-slot="${unit}" data-ad-format="auto" data-full-width-responsive="true"></ins>`;
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    }
+    makeAd('ad-top', AD_TOP_UNIT);
+    makeAd('ad-bottom', AD_BOTTOM_UNIT);
+  }
+
+  // ---------- UI & merge logic ----------
+  const pickFiles = document.getElementById('pickFiles');
+  const filesInput = document.getElementById('files');
+  const filesList = document.getElementById('filesList');
+  const dropzone = document.getElementById('dropzone');
+  const mergeBtn = document.getElementById('mergeBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const compressionSelect = document.getElementById('compression');
+  const maxWidthInput = document.getElementById('maxWidth');
+  const previewCanvas = document.getElementById('previewCanvas');
+  const filenameInput = document.getElementById('filename');
+
+  let fileItems = []; // {file, name, id}
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  pickFiles.addEventListener('click', ()=> filesInput.click());
+  filesInput.addEventListener('change', (e)=> handleFiles(e.target.files));
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(ev=> dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.style.borderColor='#cbd5e1'}));
+  ['dragleave','drop'].forEach(ev=> dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.style.borderColor=''}));
+  dropzone.addEventListener('drop', e=>{const dt=e.dataTransfer; if(dt && dt.files) handleFiles(dt.files)});
+
+  function handleFiles(fileList){
+    const arr = Array.from(fileList).filter(f=> f.type === 'application/pdf');
+    arr.forEach(f=> fileItems.push({file:f, name:f.name, id:cryptoRandomId()}));
+    renderFiles();
+    if(fileItems.length) renderPreview(fileItems[0].file);
+  }
+
+  function cryptoRandomId(){return Math.random().toString(36).slice(2,9)}
+
+  function renderFiles(){
+    filesList.innerHTML = '';
+    fileItems.forEach((it, idx)=>{
+      const div = document.createElement('div'); div.className='file-item'; div.draggable=true; div.dataset.id=it.id;
+      div.innerHTML = `<div style="display:flex;gap:.6rem;align-items:center"><svg width=20 height=20 viewBox="0 0 24 24" fill="none" style="opacity:.8"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="#6b7280" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg><div style="font-size:.95rem">${escapeHtml(it.name)}</div></div><div style="display:flex;gap:.4rem;align-items:center"><button class="ghost" data-action="up">↑</button><button class="ghost" data-action="down">↓</button><button class="ghost" data-action="remove">✕</button></div>`;
+      filesList.appendChild(div);
+    });
+
+    // attach events for reorder & remove
+    filesList.querySelectorAll('.file-item').forEach(elem=>{
+      elem.addEventListener('click', (e)=>{
+        const id = elem.dataset.id; const act = e.target.getAttribute('data-action');
+        if(!act) return;
+        const i=fileItems.findIndex(x=>x.id===id);
+        if(i===-1) return;
+        if(act==='remove') {fileItems.splice(i,1); renderFiles(); if(fileItems.length) renderPreview(fileItems[0].file); else clearPreview();}
+        if(act==='up' && i>0){const a=fileItems.splice(i,1)[0]; fileItems.splice(i-1,0,a); renderFiles()}
+        if(act==='down' && i<fileItems.length-1){const a=fileItems.splice(i,1)[0]; fileItems.splice(i+1,0,a); renderFiles()}
+      });
+
+      // drag reorder
+      elem.addEventListener('dragstart', e=>{e.dataTransfer.setData('text/plain', elem.dataset.id)});
+    });
+
+    filesList.addEventListener('dragover', e=> e.preventDefault());
+    filesList.addEventListener('drop', e=>{
+      e.preventDefault();
+      const id = e.dataTransfer.getData('text/plain');
+      const target = e.target.closest('.file-item');
+      if(!target) return;
+      const from = fileItems.findIndex(x=>x.id===id); const to = fileItems.findIndex(x=>x.id===target.dataset.id);
+      if(from>-1 && to>-1 && from!==to){const [m]=fileItems.splice(from,1); fileItems.splice(to,0,m); renderFiles();}
+    });
+  }
+
+  function escapeHtml(s){return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+
+  clearBtn.addEventListener('click', ()=>{fileItems=[]; renderFiles(); clearPreview();})
+
+  // --------- Preview rendering using PDF.js ---------
+  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  if(pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.worker.min.js';
+
+  async function renderPreview(file){
+    try{
+      const array = await file.arrayBuffer();
+      const doc = await pdfjsLib.getDocument({data:array}).promise;
+      const page = await doc.getPage(1);
+      const viewport = page.getViewport({scale:1});
+      const scale = Math.min(1, 300/viewport.height);
+      const canvas = previewCanvas; const ctx=canvas.getContext('2d');
+      const view = page.getViewport({scale: 1});
+      canvas.width = Math.min(view.width, 600); canvas.height = view.height * (canvas.width/view.width);
+      const renderContext = {canvasContext: ctx, viewport: page.getViewport({scale: canvas.width / view.width})};
+      await page.render(renderContext).promise;
+    }catch(err){console.warn('preview error',err);}
+  }
+  function clearPreview(){const c=previewCanvas; c.width=0; c.height=0}
+
+  // --------- Merge logic ---------
+  mergeBtn.addEventListener('click', async ()=>{
+    if(!fileItems.length){alert('Please add at least one PDF to merge.'); return}
+    mergeBtn.disabled = true; mergeBtn.textContent = 'Processing...';
+    try{
+      const compression = compressionSelect.value; const maxWidth = parseInt(maxWidthInput.value) || 1200;
+      // map compression to quality
+      const qualityMap = {low:0.95, medium:0.7, high:0.5};
+      const jpegQuality = qualityMap[compression] ?? 0.7;
+
+      // We'll rasterize each PDF page and build a new PDF using PDF-Lib to control image compression.
+      const mergedPdf = await PDFLib.PDFDocument.create();
+
+      for(const it of fileItems){
+        const arr = await it.file.arrayBuffer();
+        const srcDoc = await pdfjsLib.getDocument({data:arr}).promise;
+        const numPages = srcDoc.numPages;
+        for(let p=1;p<=numPages;p++){
+          const page = await srcDoc.getPage(p);
+          const viewport = page.getViewport({scale:1});
+          // compute scale to fit maxWidth
+          const scale = Math.min( (maxWidth / viewport.width), 1);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(viewport.width * scale);
+          canvas.height = Math.round(viewport.height * scale);
+          const ctx = canvas.getContext('2d');
+          const renderContext = {canvasContext: ctx, viewport: page.getViewport({scale: scale})};
+          await page.render(renderContext).promise;
+          // convert to JPEG with chosen quality
+          const dataUrl = canvas.toDataURL('image/jpeg', jpegQuality);
+          const imgBytes = dataURLToUint8Array(dataUrl);
+          // embed and add a page with the image sized to page
+          const img = await mergedPdf.embedJpg(imgBytes);
+          const pdfPage = mergedPdf.addPage([img.width, img.height]);
+          pdfPage.drawImage(img, {x:0,y:0,width:img.width,height:img.height});
+          // free canvas
+        }
+      }
+
+      const mergedBytes = await mergedPdf.save();
+      downloadBlob(new Blob([mergedBytes], {type:'application/pdf'}), filenameInput.value || 'merged.pdf');
+    }catch(err){
+      console.error(err); alert('Error while merging: ' + (err.message || err));
+    }finally{
+      mergeBtn.disabled = false; mergeBtn.textContent = 'Merge & Download';
+    }
+  });
+
+  function dataURLToUint8Array(dataurl){
+    const arr = dataurl.split(','); const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]); let n=bstr.length; const u8=new Uint8Array(n);
+    while(n--) u8[n]=bstr.charCodeAt(n);
+    return u8;
+  }
+
+  function downloadBlob(blob, filename){
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(a.href), 2000);
+  }
+
+  // init
+  injectAds();
+
+  // Expose small helpers on window for debugging
+  window.__pdfMerger = {fileItems, injectAds};
+  </script>
+</body>
+</html>
