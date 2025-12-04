@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Letus — Smart Monetized Tools</title>
+  <meta name="description" content="Letus - Simple, fast utilities & monetization-ready web app. Image compressor, PDF tools, resizer and more." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="brand">Letus</h1>
+      <nav class="nav">
+        <a href="#features">Tools</a>
+        <a href="#how">How it earns</a>
+        <a href="#" id="downloadBtn">Get App</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <h2>Letus — Smart tools, zyada kamai</h2>
+          <p>Free, fast, and mobile-friendly tools. Ads + premium subscriptions = steady revenue.</p>
+          <div class="cta-row">
+            <button id="startBtn" class="btn primary">Start Using Tools</button>
+            <button id="learnBtn" class="btn outline">Monetization Tips</button>
+          </div>
+        </div>
+        <div class="mockup">
+          <div class="phone">
+            <div class="screen">
+              <p class="screen-text">Your Tool Dashboard</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="container section">
+      <h3>Popular Tools</h3>
+      <div class="tools-grid">
+        <article class="tool-card">
+          <h4>Image Compressor</h4>
+          <p>Compress JPG/PNG quickly without losing quality.</p>
+          <div class="card-actions">
+            <button class="btn small" data-tool="image">Use</button>
+            <a class="link" href="#">Docs</a>
+          </div>
+        </article>
+
+        <article class="tool-card">
+          <h4>PDF Merger</h4>
+          <p>Combine multiple PDFs into one file, fast.</p>
+          <div class="card-actions">
+            <button class="btn small" data-tool="pdf">Use</button>
+            <a class="link" href="#">Docs</a>
+          </div>
+        </article>
+
+        <article class="tool-card">
+          <h4>Image Resizer</h4>
+          <p>Resize images with preset dimensions for social or web.</p>
+          <div class="card-actions">
+            <button class="btn small" data-tool="resize">Use</button>
+            <a class="link" href="#">Docs</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="how" class="container section">
+      <h3>How this app earns (ideas)</h3>
+      <ul class="earn-list">
+        <li>Banner & Interstitial Ads (AdMob / AdSense)</li>
+        <li>Rewarded Ads (unlock features)</li>
+        <li>Ad-free premium subscription</li>
+        <li>Affiliate links & sponsored tools</li>
+      </ul>
+    </section>
+
+    <section class="container section" aria-hidden="true">
+      <!-- Ad placeholder (replace with your AdSense snippet when ready) -->
+      <div class="ad-placeholder">Ad space — replace with AdSense or AdMob web ad code</div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="year"></span> Letus · Built for growth</p>
+      <p class="mini">Replace ad placeholders and add GDPR consent before publishing.</p>
+    </div>
+  </footer>
+
+  <!-- Modal -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-panel">
+      <button class="modal-close" id="closeModal" aria-label="close">✕</button>
+      <h4 id="modalTitle">Tool</h4>
+      <p id="modalBody">Loading…</p>
+
+      <div class="modal-actions">
+        <button id="modalAction" class="btn primary">Try</button>
+        <button id="modalCancel" class="btn outline">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+:root{
+  --bg:#0f1724; /* dark blue */
+  --card:#0b1220;
+  --accent:#1dc7b7;
+  --muted:#9aa4b2;
+  --glass: rgba(255,255,255,0.03);
+  --radius:12px;
+  --container:1100px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background: linear-gradient(180deg, #071028 0%, #071226 100%);
+  color:#eaf3f2;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+
+.container{
+  width:90%;
+  max-width:var(--container);
+  margin:0 auto;
+}
+
+/* Header */
+.site-header{
+  padding:18px 0;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+}
+.brand{
+  margin:0;
+  font-size:20px;
+  letter-spacing:0.5px;
+  display:inline-block;
+}
+.nav{
+  float:right;
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+.nav a{ color:var(--muted); text-decoration:none; font-size:14px; }
+.nav a#downloadBtn{ background:transparent; padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); color:var(--accent) }
+
+/* Hero */
+.hero{ padding:38px 0; }
+.hero-grid{ display:grid; grid-template-columns: 1fr 320px; gap:24px; align-items:center; }
+.hero h2{ margin:0 0 12px; font-size:28px; color:#fff; }
+.hero p{ color:var(--muted); margin:0 0 16px; }
+
+/* Mockup */
+.phone{ width:240px; height:440px; border-radius:28px; background:linear-gradient(180deg,#06111a,#08202c); padding:18px; box-shadow:0 8px 30px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.03) }
+.screen{ background:var(--glass); height:100%; border-radius:16px; display:flex; align-items:center; justify-content:center; text-align:center; padding:18px; color:var(--muted); }
+.screen-text{ font-size:14px; }
+
+/* Buttons */
+.btn{ border:0; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; background:transparent; color:inherit; }
+.btn.primary{ background:linear-gradient(90deg,var(--accent),#39e7c8); color:#022; box-shadow: 0 8px 18px rgba(29,199,183,0.12); }
+.btn.outline{ border:1px solid rgba(255,255,255,0.06); }
+.btn.small{ padding:8px 10px; font-size:13px }
+
+/* Sections */
+.section{ padding:28px 0; }
+.tools-grid{ display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:18px; margin-top:12px; }
+.tool-card{ background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); padding:16px; border-radius:12px; border:1px solid rgba(255,255,255,0.03) }
+.card-actions{ margin-top:12px; display:flex; gap:10px; align-items:center }
+
+/* Earn list & ad placeholder */
+.earn-list{ color:var(--muted); margin:10px 0 0; padding-left:18px }
+.ad-placeholder{ margin:18px 0; padding:18px; text-align:center; border-radius:12px; background:rgba(255,255,255,0.02); color:var(--muted) }
+
+/* Footer */
+.site-footer{ padding:20px 0; border-top:1px solid rgba(255,255,255,0.03); color:var(--muted); font-size:13px; }
+
+/* Modal */
+.modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,12,0.6); opacity:0; pointer-events:none; transition:0.18s }
+.modal[aria-hidden="false"]{ opacity:1; pointer-events:auto }
+.modal-panel{ width:min(520px, 92%); background:linear-gradient(180deg,#071019,#071a23); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.04); position:relative }
+.modal-close{ position:absolute; top:12px; right:12px; background:transparent; border:0; font-size:16px; color:var(--muted); cursor:pointer }
+.modal-actions{ margin-top:16px; display:flex; gap:10px; justify-content:flex-end }
+
+/* responsive */
+@media (max-width:880px){
+  .hero-grid{ grid-template-columns: 1fr; text-align:center }
+  .nav{ display:none }
+  .brand{ float:none }
+}
+// Basic interactivity for the sample page
+document.addEventListener('DOMContentLoaded', () => {
+  // Update year
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Modal elements
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBody = document.getElementById('modalBody');
+  const modalAction = document.getElementById('modalAction');
+  const closeModal = document.getElementById('closeModal');
+  const modalCancel = document.getElementById('modalCancel');
+
+  // Open modal when a tool button is clicked
+  document.querySelectorAll('[data-tool]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tool = btn.getAttribute('data-tool');
+      modalTitle.textContent = toolToTitle(tool);
+      modalBody.textContent = toolToDescription(tool);
+      modalAction.textContent = 'Open ' + toolToTitle(tool);
+      modalAction.onclick = () => {
+        // placeholder behaviour — replace with actual navigation or tool init
+        alert('Opening ' + toolToTitle(tool) + ' (replace with real tool).');
+        closeModalFunc();
+      };
+      openModal();
+    });
+  });
+
+  // Header CTAs
+  document.getElementById('startBtn').addEventListener('click', () => {
+    location.hash = '#features';
+    // optionally add small animation or focus
+    flashElement(document.querySelector('#features'));
+  });
+
+  document.getElementById('learnBtn').addEventListener('click', () => {
+    alert('Monetization tips:\\n1) Use rewarded ads\\n2) Offer ad-free subscription\\n3) Add affiliate content');
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    // simulate app download / play store link
+    window.open('https://play.google.com/store/apps', '_blank');
+  });
+
+  closeModal.addEventListener('click', closeModalFunc);
+  modalCancel.addEventListener('click', closeModalFunc);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModalFunc();
+  });
+
+  function openModal(){
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModalFunc(){
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function toolToTitle(key){
+    return {
+      image: 'Image Compressor',
+      pdf: 'PDF Merger',
+      resize: 'Image Resizer'
+    }[key] || 'Tool';
+  }
+  function toolToDescription(key){
+    return {
+      image: 'Compress JPG/PNG quickly in the browser. Good for reducing upload size and saving bandwidth.',
+      pdf: 'Merge multiple PDF files into a single document with order selection.',
+      resize: 'Resize an image to common presets (Instagram, Thumbnail, Custom).'
+    }[key] || '';
+  }
+
+  // little helper: flash element
+  function flashElement(el){
+    if(!el) return;
+    el.style.transition = 'box-shadow 0.3s';
+    el.style.boxShadow = '0 8px 30px rgba(29,199,183,0.12)';
+    setTimeout(()=> el.style.boxShadow = '', 700);
+  }
+});
+
